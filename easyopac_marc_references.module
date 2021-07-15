@@ -73,20 +73,22 @@ function easyopac_marc_references_field_formatter_view($entity_type, $entity, $f
   $values_u = $object->getValue('856', 'u');
   $values_z = $object->getValue('856', 'z');
 
-  $values = [];
-  foreach ($values_z as $key => $item) {
-    $values[] = $item . '<br>' . l($values_u[$key], $values_u[$key]);
+  if (!empty($values_u) && !empty($values_z)) {
+    $values = [];
+    foreach ($values_z as $key => $item) {
+      $values[] = $item . '<br>' . l($values_u[$key], $values_u[$key]);
+    }
+
+    $items[0] = [
+      '#type' => 'markup',
+      '#markup' => theme('item_list', [
+        'items' => $values,
+        'attributes' => ['class' => ['marc-references']],
+      ]),
+    ];
+
+    return $items;
   }
-
-  $items[0] = [
-    '#type' => 'markup',
-    '#markup' => theme('item_list', [
-      'items' => $values,
-      'attributes' => ['class' => ['marc-references']],
-    ]),
-  ];
-
-  return $items;
 }
 
 /**
