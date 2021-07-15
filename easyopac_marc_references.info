@@ -1,0 +1,16 @@
+name = easyOPAC MARC References
+description = Requests and display MARC items from group 856
+core = 7.x
+package = easyOPAC
+dependencies[] = ctools
+dependencies[] = easyopac_marc_references
+dependencies[] = features
+dependencies[] = field_group
+dependencies[] = virtual_field
+explanation = Anvendte felttyper - se <a href="/da/admin/reports/fields">feltliste</a>
+features[ctools][] = field_group:field_group:1
+features[features_api][] = api:2
+features[field_base][] = field_marc_references
+features[field_group][] = group_marc_references|ting_object|ting_object|default
+features[field_instance][] = ting_object-ting_object-field_marc_references
+features_exclude[dependencies][easyopac_marc_references] = easyopac_marc_references

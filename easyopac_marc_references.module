@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ */
+
+include_once 'easyopac_marc_references.features.inc';
+
+/**
+ * Implements hook_field_info().
+ */
+function easyopac_marc_references_field_info() {
+  return [
+    'easyopac_marc_references' => [
+      'label' => t('MARC References'),
+      'description' => t('MARC references from group 856.'),
+      'default_widget' => 'hidden',
+      'default_formatter' => 'easyopac_marc_references_default',
+      'virtual_field' => [
+        'entity_types' => ['ting_object'],
+        'add_widget' => TRUE,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function easyopac_marc_references_field_formatter_info() {
+  return [
+    'easyopac_marc_references_default' => [
+      'label' => t('Default'),
+      'field types' => [
+        'easyopac_marc_references',
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function easyopac_marc_references_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  foreach ($entities as $id => $entity) {
+    $items[$id][0] = [
+      'provider_id' => $entity->localId,
+    ];
+  }
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function easyopac_marc_references_field_widget_info_alter(&$info) {
+  if (isset($info['hidden'])) {
+    $info['hidden']['field types'][] = 'easyopac_marc_references';
+  }
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function easyopac_marc_references_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  module_load_include('inc', 'opensearch', 'opensearch.client');
+  $object = opensearch_get_objects_marcxchange([$entity->localId]);
+
+  if (empty($object)) {
+    return NULL;
+  }
+  $object = reset($object);
+
+  $values_u = $object->getValue('856', 'u');
+  $values_z = $object->getValue('856', 'z');
+
+  $values = [];
+  foreach ($values_z as $key => $item) {
+    $values[] = $item . '<br>' . l($values_u[$key], $values_u[$key]);
+  }
+
+  $items[0] = [
+    '#type' => 'markup',
+    '#markup' => theme('item_list', [
+      'items' => $values,
+      'attributes' => ['class' => ['marc-references']],
+    ]),
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_field_group_build_pre_render_alter().
+ */
+function easyopac_marc_references_field_group_build_pre_render_alter(&$element) {
+  if (isset($element['group_ting_object_right_column'])) {
+    $fg_length = count($element['group_ting_object_right_column']);
+
+    if (!array_key_exists('group_marc_references', $element['group_ting_object_right_column'])) {
+      $element['group_ting_object_right_column']['group_marc_references'] = $element['group_marc_references'];
+      $element['group_ting_object_right_column']['group_marc_references']['#weight'] = $fg_length + 1;
+    }
+    elseif ($element['group_ting_object_right_column']['group_marc_references']['#weight'] < 8) {
+      $element['group_ting_object_right_column']['group_marc_references']['#weight'] = $fg_length + 1;
+    }
+  }
+}
