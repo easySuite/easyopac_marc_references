@@ -3,7 +3,6 @@ description = Requests and display MARC items from group 856
 core = 7.x
 package = easyOPAC
 dependencies[] = ctools
-dependencies[] = easyopac_marc_references
 dependencies[] = features
 dependencies[] = field_group
 dependencies[] = virtual_field
